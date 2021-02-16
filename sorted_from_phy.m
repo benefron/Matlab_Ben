@@ -1,12 +1,11 @@
-function [sorted_spikes] = sorted_from_phy(varargin)
+function [sorted_spikes] = sorted_from_phy(params)
 %this function outputs a structure with 'good' and 'mua' fields containing
 %the info about the sorted spikes
 %   This function recives a folder path with the sorted data from kilosort2 and phy2
 %   it reads the relevant files from the folder to create a structure
 %   containing the data of spike timing divided into the appropriate units
-funCase = 2;
-run(varargin{1});
-cd(sorting_cd)
+run(params);
+cd(['/home/ben/Z/Sorting/',expName,'/phy'])
 
 
 %% read the relevant files into matlab format
