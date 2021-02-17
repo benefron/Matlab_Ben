@@ -26,7 +26,6 @@ classdef auditory_ephys_exp
         Speaker     % Times of evoked speaker signal
         Conditions  % Times of different experiment conditions
         Avisoft_times   % Start, end, SF, and timestamps of mic signal from Avisoft
-        OpenEpyhs_times     % Start, end and timestamps of all signals from openephys
         Cams    % Timestamps of camrea frames !!!align with avi if needed
        
     end
@@ -38,17 +37,39 @@ classdef auditory_ephys_exp
     end
     
     methods 
-        function obj = create_experiment(parameters_file) 
+        function obj = auditory_ephys_exp(parameters_file) 
             %UNTITLED4 Construct an instance of this class
             %   Detailed explanation goes here
             run(parameters_file);
             obj.experiment_ID = expName;
+            obj.experiment_path = exp_path;
             obj.parameters_file = parameters_file;
+            cd(exp_path);
+            whisk_filename = dir('*whisking.csv');
+            obj.Whisking_simple = csvread([whisk_filename.folder,'/',whisk_filename.name]);
+            load([exp_path,'/condition_extract.mat']);
+            obj.Conditions = condition_extract;
             obj.color.Aluminum = [0.0039 * 210 , 0.0039 * 30 , 0.0039 * 75]; % D21E4B adobe color wheel
             obj.color.noObject = [0.0039 * 232 , 0.0039 * 134 , 0.0039 * 65]; % 284B59 adobe color wheel
             obj.color.Muted = [0.0039 * 40, 0.0039 * 75, 0.0039 * 89]; % E88641 adobe color wheel
             obj.experiment_path = exp_path;
-            %% get the synced times and vectors from avi and camera
+            obj.Cams.Whisking = syncCamera(obj.parameters_file,1);
+            obj.Cams.Face = syncCamera(obj.parameters_file,2);
+            obj.Units = sorted_from_phy(obj.parameters_file);
+            %% get the data from openephys
+            data_temp = load_open_ephys_binary([exp_path,'/experiment1/recording1/structure.oebin'],'continuous',1,'mmap');
+            obj.Encoder = double(data_temp.Data.Data.mapped(32 + encoder,:));
+            try
+                [obj.Avisoft_times] = avisoftSync(obj.parameters_file);
+                cd(exp_path);
+                files = dir('*.wav');
+                obj.Mic = audioread([files.folder,'/',files.name]);
+            catch
+                warning("Can't run avisoft sync, assigning MIC signal from open ephys");
+                obj.Avisoft_times = 0;
+                obj.Mic = souble(data_temp.Data.Data.mapped(32 + mic,:));
+                
+            end
             
         end
         

@@ -1,4 +1,4 @@
-function [Avisoft_times,Open_ephys_times] = avisoftSync(params_file)
+function [Avisoft_times] = avisoftSync(params_file)
 %% load the files and create the variables
 run(params_file);
 data = load_open_ephys_binary([exp_path,'/experiment1/recording1/structure.oebin'],'continuous',1,'mmap');
@@ -28,8 +28,9 @@ length_open = open_end - open_start;
 time_total = length_open/SF;
 true_avi_SF = (avi_end - avi_start)/time_total;
 
-time_vector_open = [1:length(aud_op)] - open_start;
-time_vector_avi = [1:length(aud_avi)] - avi_start;
+SF_ratio = true_avi_SF/SF;
+time_vector_avi = [1:length(aud_avi)]' - avi_start;
+time_vector_avi = time_vector_avi + (floor(SF_ratio * open_start));
 
 
 
@@ -38,12 +39,12 @@ time_vector_avi = [1:length(aud_avi)] - avi_start;
 
 
 %% create output structures
-Avisoft_times.start = avi_start;
-Avisoft_times.end = avi_end + 1;
+Avisoft_times.avi_start = avi_start;
+Avisoft_times.avi_end = avi_end + 1;
 Avisoft_times.alignedFrames = time_vector_avi;
 Avisoft_times.SF = true_avi_SF;
-Open_ephys_times.start = open_start + 1;
-Open_ephys_times.end = open_end;
-Open_ephys_times.alignedFrames = time_vector_open;
+Avisoft_times.open_ephys_start = open_start;
+Avisoft_times.open_ephys_end = open_end + 1;
+Avisoft_times.sampling_ratio = SF_ratio;
 end
 

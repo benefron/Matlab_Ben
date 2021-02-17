@@ -1,12 +1,12 @@
-function [cams] = syncCamera(parameter_file)
+function [cams] = syncCamera(parameter_file,x)
 %Sync the camera frame times to the open ephys strobe times
 %   Choose the camera file for face camera or for whisker camera and
 %   extract the frames, find the starting frame from both the camera csv
 %   file and the strobe data from the open ephys. 
+%   x - categorical. recieves 1 or 2, 1 for whisker camera, 2 for face cam
 run(parameter_file)
 % Choose if whisking camera or face camera and choose the appropriate file
 cd(exp_path)
-x = input('type 1 for whisker camera, type 2 for face camera')
 switch x
     case 1
         disp('Choose csv file for the whisking camera');
@@ -36,11 +36,12 @@ csv_start = csv_start(end);
 % align both time stamps
 csv_times = (csv_data(:,2) - csv_data(1,2))/10000000;
 csv_times = csv_times - csv_times(csv_start);
-csv_times = csv_times + ((strobe_start - double(full_timestamps(1))) * open_ephys_TTL.Header.sample_rate);
-csv_frames = floor(csv_times/
+csv_frames = floor(csv_times * open_ephys_TTL.Header.sample_rate);
+csv_frames = csv_frames + (trobe_start - double(full_timestamps(1))
 % save the timestamps and frame times
-cams.strobe_start_frame = strobe_start - full_timestamps(1);
+cams.strobe_start_frame = strobe_start - double(full_timestamps(1));
 cams.csv_start = csv_start;
-cams.aligned_times = [];
+cams.csv_aligned_times = csv_times;
+cams.csv_aligned_frames = csv_frames;
 end
 
