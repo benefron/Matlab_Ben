@@ -16,7 +16,7 @@ switch x
         strobe_channel = face_camera;
 end
 [file,path] = uigetfile('*.csv');
-cam_fps = input('Please input the fps for the current cam')
+cam_fps = input(['Please input the fps for the current cam' '\n']);
 
 
 % read csv file to variable
@@ -42,5 +42,6 @@ csv_frames = csv_frames + (strobe_start - double(full_timestamps(1)));
 cams.strobe_start_frame = strobe_start - double(full_timestamps(1));
 cams.csv_start_frame = csv_start;
 cams.csv_aligned_frames = csv_frames;
+cams.fps = cam_fps;
 end
 

@@ -5,7 +5,7 @@ function [sorted_spikes] = sorted_from_phy(params)
 %   it reads the relevant files from the folder to create a structure
 %   containing the data of spike timing divided into the appropriate units
 run(params);
-cd(['/home/ben/Z/Sorting/',expName,'/phy'])
+cd(sorting_path)
 
 
 %% read the relevant files into matlab format
